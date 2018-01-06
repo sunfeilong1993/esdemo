@@ -1,14 +1,9 @@
 package com.sun.xiaotian.esdemo.usecase;
 
-import org.apache.http.HttpHost;
 import org.apache.http.message.BasicHeader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
-
-
 
 import java.io.IOException;
 
@@ -25,9 +20,7 @@ public class HelloElasticsearch {
 
     public static void main(String[] args) throws IOException {
 
-        RestClientBuilder restClientBuilder = RestClient.builder(new HttpHost("localhost", 9200, "http"));
-
-        try (RestHighLevelClient client = new RestHighLevelClient(restClientBuilder);) {
+        try (RestHighLevelClient client = new RestHighLevelClient(RestClientBuilderFactory.getBClientBuilder())) {
             boolean ping = client.ping(new BasicHeader("name", "value"));
             logger.info("ping 通了吗? " + (ping ? "通了" : "没有"));
         } catch (IOException e) {
