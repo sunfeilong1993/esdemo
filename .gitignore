@@ -1,0 +1,20 @@
+## HBuider Project File
+*.project
+
+## Intelij idea ProjectFile
+.idea/
+*.iml
+
+## log file
+*.log
+
+## target/out file
+target/
+out/
+
+## jvm log
+java_pid5268.hprof.analysis
+*.hprof
+
+##
+/*.txt
