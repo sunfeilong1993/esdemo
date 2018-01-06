@@ -18,9 +18,8 @@
 
     <properties>
         <elasticsearch-rest-high-level-client-version>6.0.1</elasticsearch-rest-high-level-client-version>
-        <slf4j.version>1.7.7</slf4j.version>
-        <log4j.version>1.2.16</log4j.version>
         <log4j-core>2.10.0</log4j-core>
+        <log4j-api>2.10.0</log4j-api>
     </properties>
 
 
@@ -45,15 +44,11 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+        </dependency>
 
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-        </dependency>
     </dependencies>
 
 
@@ -70,17 +65,12 @@
                 <artifactId>log4j-core</artifactId>
                 <version>${log4j-core}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-api</artifactId>
+                <version>${log4j-api}</version>
+            </dependency>
 
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-log4j12</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-                <version>${log4j.version}</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 

@@ -2,11 +2,13 @@ package com.sun.xiaotian.esdemo.usecase;
 
 import org.apache.http.HttpHost;
 import org.apache.http.message.BasicHeader;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+
 
 import java.io.IOException;
 
@@ -19,7 +21,7 @@ import java.io.IOException;
 
 public class HelloElasticsearch {
 
-    private final static Logger logger = LoggerFactory.getLogger(HelloElasticsearch.class);
+    private final static Logger logger = LogManager.getLogger(HelloElasticsearch.class);
 
     public static void main(String[] args) throws IOException {
 
