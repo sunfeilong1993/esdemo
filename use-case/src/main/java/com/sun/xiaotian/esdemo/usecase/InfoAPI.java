@@ -20,7 +20,7 @@ public class InfoAPI {
 
     public static void main(String[] args) {
 
-        try (RestHighLevelClient client = new RestHighLevelClient(H.getBClientBuilder())) {
+        try (RestHighLevelClient client = new RestHighLevelClient(RestClientBuilderFactory.getBClientBuilder())) {
             MainResponse clusterInfo = client.info();
             logger.info("ClusterUuid: " + clusterInfo.getClusterUuid());
             logger.info("ClusterName: " + clusterInfo.getClusterName());
