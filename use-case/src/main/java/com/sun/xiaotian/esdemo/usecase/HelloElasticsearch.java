@@ -22,7 +22,7 @@ public class HelloElasticsearch {
         try (RestHighLevelClient client = new RestHighLevelClient(RestClientBuilderFactory.getBClientBuilder())) {
             boolean ping = client.ping();
             logger.info("ping 通了吗? " + (ping ? "通了" : "没有"));
-        } catch (IOException e) {
+        } catch (IOException | RuntimeException e) {
             logger.error(e.getMessage(), e);
         }
     }

@@ -31,7 +31,7 @@ public class InfoAPI {
             Build build = clusterInfo.getBuild();
             logger.info("Build: " + build);
             logger.info("Build is Snapshot: " + build.isSnapshot());
-        } catch (IOException e) {
+        } catch (IOException | RuntimeException e) {
             logger.error(e.getMessage(), e);
         }
     }

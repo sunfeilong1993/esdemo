@@ -2,11 +2,15 @@ package com.sun.xiaotian.esdemo.usecase;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.elasticsearch.ElasticsearchException;
+import org.elasticsearch.action.ActionRequestValidationException;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
+import org.elasticsearch.action.get.GetRequest;
+import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.support.WriteRequest;
-import org.elasticsearch.action.update.UpdateRequest;
-import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.unit.TimeValue;
 
@@ -27,15 +31,13 @@ public class DeleteAPI {
 
     public static void main(String[] args) {
 
-        UpdateRequest updateRequest = new UpdateRequest("test", "test", "1");
+        IndexRequest indexRequest = new IndexRequest("test", "test", "1");
         HashMap<String, Object> data = new HashMap<>();
         data.put("name", "xiaotian");
         data.put("age", 24);
         data.put("birthday", new Date());
-        updateRequest
-                .upsert()
-                .doc(data);
-
+        indexRequest.source(data);
+        GetRequest getRequest = new GetRequest("test", "test", "1");
 
         DeleteRequest deleteRequest = new DeleteRequest("test", "test", "1");
         deleteRequest
@@ -43,12 +45,21 @@ public class DeleteAPI {
                 .setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
 
         try (RestHighLevelClient client = new RestHighLevelClient(RestClientBuilderFactory.getBClientBuilder())) {
-            UpdateResponse updateResponse = client.update(updateRequest);
+            IndexResponse indexResponse = client.index(indexRequest);
+            logger.info("index: " + indexResponse);
+            GetResponse getResponse = client.get(getRequest);
+            logger.info("Get: " + getResponse);
 
-            deleteRequest.version(updateResponse.getVersion());
+            //指定版本
+            deleteRequest.version(indexResponse.getVersion());
             DeleteResponse response = client.delete(deleteRequest);
-            System.out.println(response.status());
-        } catch (IOException | RuntimeException e) {
+            logger.info("Delete Document:" + response);
+
+            //删除索引,会报错 Validation Failed: 1: type is missing;2: id is missing;
+            DeleteRequest deleteIndex = new DeleteRequest("test");
+            DeleteResponse delete = client.delete(deleteIndex);
+            logger.info("Delete Index:" + response);
+        } catch (IOException | ElasticsearchException | ActionRequestValidationException e) {
             logger.error(e.getMessage(), e);
         }
     }
