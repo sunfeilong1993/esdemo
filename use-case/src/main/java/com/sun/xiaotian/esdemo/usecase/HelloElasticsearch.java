@@ -21,7 +21,7 @@ public class HelloElasticsearch {
     public static void main(String[] args) throws IOException {
 
         try (RestHighLevelClient client = new RestHighLevelClient(RestClientBuilderFactory.getBClientBuilder())) {
-            boolean ping = client.ping(new BasicHeader("name", "value"));
+            boolean ping = client.ping();
             logger.info("ping 通了吗? " + (ping ? "通了" : "没有"));
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
