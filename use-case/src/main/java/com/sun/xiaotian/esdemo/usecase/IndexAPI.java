@@ -10,6 +10,7 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.action.support.replication.ReplicationResponse;
+import org.elasticsearch.client.Requests;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentBuilder;
@@ -34,7 +35,9 @@ public class IndexAPI {
 
         try (RestHighLevelClient client = new RestHighLevelClient(RestClientBuilderFactory.getBClientBuilder())) {
 
-            IndexRequest request = new IndexRequest("human", "person", "3");
+            IndexRequest indexRequest = Requests.indexRequest("human");
+            indexRequest.type("person");
+            indexRequest.id("3");
 
             XContentBuilder contentBuilder = XContentFactory.jsonBuilder();
             contentBuilder.startObject();
@@ -43,7 +46,7 @@ public class IndexAPI {
             contentBuilder.field("birthday", new Date());
             contentBuilder.endObject();
 
-            request.source(contentBuilder);
+            indexRequest.source(contentBuilder);
 
             //指定路由字段，相同的路由字段的文档会被分配到相同的分片上
             //可能会导致存在相同的id
@@ -73,13 +76,13 @@ public class IndexAPI {
              }
              }
              */
-            request.routing("3");
+            indexRequest.routing("3");
             //超时时间
-            request.timeout(TimeValue.timeValueSeconds(1));
-            request.setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
-            request.opType(DocWriteRequest.OpType.INDEX);
+            indexRequest.timeout(TimeValue.timeValueSeconds(1));
+            indexRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
+            indexRequest.opType(DocWriteRequest.OpType.INDEX);
 
-            client.indexAsync(request, new ActionListener<IndexResponse>() {
+            client.indexAsync(indexRequest, new ActionListener<IndexResponse>() {
                 @Override
                 public void onResponse(IndexResponse response) {
                     logger.info(response);
@@ -103,6 +106,7 @@ public class IndexAPI {
                         }
                     }
                 }
+
                 @Override
                 public void onFailure(Exception e) {
                     logger.error("执行出错", e);
