@@ -1,4 +1,4 @@
-package com.sun.xiaotian.esdemo.initdata.note;
+package com.sun.xiaotian.esdemo.initdata.helper;
 
 
 import java.io.File;

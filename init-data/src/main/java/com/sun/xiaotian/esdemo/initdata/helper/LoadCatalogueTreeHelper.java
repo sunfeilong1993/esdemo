@@ -1,25 +1,21 @@
-package com.sun.xiaotian.esdemo.initdata.note;
+package com.sun.xiaotian.esdemo.initdata.helper;
 
 
 import com.github.stuxuhai.jpinyin.PinyinException;
+import com.sun.xiaotian.esdemo.initdata.model.FileInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 
+public class LoadCatalogueTreeHelper {
 
-public class LoadCatalogueTree {
-
-    private final static Logger logger = LogManager.getLogger(LoadCatalogueTree.class);
+    private final static Logger logger = LogManager.getLogger(LoadCatalogueTreeHelper.class);
 
     private String filePath;
 
@@ -57,7 +53,7 @@ public class LoadCatalogueTree {
         }
 
         FileInfo tempFileInfo = new FileInfo();
-        tempFileInfo.setId(PinYin.from(FileInfo.prefix, file.getName(), Md5CodeHelper.getInstance().getMd5Code(file.getName())));
+        tempFileInfo.setId(ChineseToPinYinHelper.from(FileInfo.prefix, file.getName(), Md5CodeHelper.getInstance().getMd5Code(file.getName())));
         tempFileInfo.setParentId(parentId);
         tempFileInfo.setPath(file.getAbsolutePath().replace(filePath, ""));
         tempFileInfo.setStatue("Active");

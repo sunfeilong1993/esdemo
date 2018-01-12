@@ -1,6 +1,9 @@
-package com.sun.xiaotian.esdemo.initdata.note;
+package com.sun.xiaotian.esdemo.initdata;
 
-import com.sun.xiaotian.esdemo.initdata.RestClientBuilderFactory;
+import com.sun.xiaotian.esdemo.initdata.constant.Constant;
+import com.sun.xiaotian.esdemo.initdata.factory.RestClientBuilderFactory;
+import com.sun.xiaotian.esdemo.initdata.model.FileInfo;
+import com.sun.xiaotian.esdemo.initdata.helper.LoadCatalogueTreeHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.ElasticsearchException;
@@ -40,9 +43,6 @@ import java.util.List;
  */
 public class ImportNoteData {
 
-    private final static String HOST = "127.0.0.1";
-    private final static int PORT = 9300;
-
     //Node 的github地址 https://github.com/longlongxiao/Notes
     private final static String notePath = "D:\\work\\workspace\\github\\Notes";
 
@@ -58,7 +58,7 @@ public class ImportNoteData {
             System.exit(0);
         }
         //读取数据
-        LoadCatalogueTree loadCatalogueTree = new LoadCatalogueTree();
+        LoadCatalogueTreeHelper loadCatalogueTree = new LoadCatalogueTreeHelper();
         List<FileInfo> fileInfoList = null;
         try {
             fileInfoList = loadCatalogueTree.loadByDirectory(new File(notePath));
@@ -112,7 +112,7 @@ public class ImportNoteData {
         try (TransportClient client = new PreBuiltTransportClient(Settings.EMPTY)) {
             PutMappingRequest noteMappingRequest = Requests.putMappingRequest();
 
-            client.addTransportAddress(new TransportAddress(InetAddress.getByName(HOST), PORT));
+            client.addTransportAddress(new TransportAddress(InetAddress.getByName(Constant.HOST), Constant.T_PORT));
             IndicesAdminClient adminClient = client.admin().indices();
 
             //es 支持的数据类型 https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-types.html

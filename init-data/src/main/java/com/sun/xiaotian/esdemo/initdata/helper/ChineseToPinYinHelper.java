@@ -1,4 +1,4 @@
-package com.sun.xiaotian.esdemo.initdata.note;
+package com.sun.xiaotian.esdemo.initdata.helper;
 
 
 import com.github.stuxuhai.jpinyin.PinyinException;
@@ -6,9 +6,9 @@ import com.github.stuxuhai.jpinyin.PinyinFormat;
 import com.github.stuxuhai.jpinyin.PinyinHelper;
 
 /**
- * 汉子转拼音
+ * 汉字转拼音
  */
-public class PinYin {
+public class ChineseToPinYinHelper {
 
     /**
      * 把汉字转换为拼音，转换结果  pinyin(prefix_content_suffix)
