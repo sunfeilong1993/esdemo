@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 
 /**
- * Description   :   <br/>
+ * Description   :   删除游标缓存信息<br/>
  * Project Name  :   esdemo<br/>
  * Author        :   FieLong Sun<br/>
  * Date          :   2018-01-07  21:45<br/>
