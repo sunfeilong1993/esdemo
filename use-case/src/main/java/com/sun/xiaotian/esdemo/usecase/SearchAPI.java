@@ -41,7 +41,7 @@ public class SearchAPI {
     private static void testSearchAll() {
         try (RestHighLevelClient client = new RestHighLevelClient(RestClientBuilderFactory.getBClientBuilder())) {
             //限制在哪个索引上查找
-            SearchRequest searchRequest = new SearchRequest("test");
+            SearchRequest searchRequest = new SearchRequest("note");
             //6.0 之后一个索引里面只能包含一种类型，可以不设置
             //searchRequest.types("test");
             searchRequest.indicesOptions(IndicesOptions.lenientExpandOpen());
@@ -52,6 +52,9 @@ public class SearchAPI {
             searchSourceBuilder.query(QueryBuilders.matchAllQuery());
             //指定获取结果的数量,默认值是 10
             searchSourceBuilder.size(1);
+            String[] includeFields = new String[]{"filename", "createdate"};
+            String[] excludeFields = new String[]{};
+            searchSourceBuilder.fetchSource(includeFields, excludeFields);
             searchSourceBuilder.timeout(new TimeValue(3, TimeUnit.SECONDS));
 
             searchRequest.source(searchSourceBuilder);
@@ -64,12 +67,12 @@ public class SearchAPI {
 
     private static void testMatchQueryBuilder() {
         try (RestHighLevelClient client = new RestHighLevelClient(RestClientBuilderFactory.getBClientBuilder())) {
-            SearchRequest searchRequest = new SearchRequest("test");
-            searchRequest.types("test");
+            SearchRequest searchRequest = new SearchRequest("note");
+            searchRequest.types("note");
             //优先搜索那些分片
             searchRequest.preference("_local");
 
-            MatchQueryBuilder matchQueryBuilder = new MatchQueryBuilder("name", "name 1");
+            MatchQueryBuilder matchQueryBuilder = new MatchQueryBuilder("content", "文档中文");
             matchQueryBuilder.operator(Operator.OR);
             matchQueryBuilder.minimumShouldMatch("70%");
             //宽容策略，设置位true表示，忽略查询类型和实际字段类型不一样的异常
@@ -88,7 +91,7 @@ public class SearchAPI {
             searchSourceBuilder.query(matchQueryBuilder);
             //只显示文档部分字段信息
             //searchSourceBuilder.fetchSource(false);
-            String[] includeFields = new String[]{"name", "date"};
+            String[] includeFields = new String[]{"filename", "createdate"};
             String[] excludeFields = new String[]{};
             searchSourceBuilder.fetchSource(includeFields, excludeFields);
 
@@ -103,20 +106,23 @@ public class SearchAPI {
 
     private static void testSearchSourceBuilder() {
         try (RestHighLevelClient client = new RestHighLevelClient(RestClientBuilderFactory.getBClientBuilder())) {
-            SearchRequest searchRequest = new SearchRequest("test");
-            searchRequest.types("test");
+            SearchRequest searchRequest = new SearchRequest("note");
+            searchRequest.types("note");
             searchRequest.indicesOptions(IndicesOptions.strictExpand());
             //优先搜索那些分片
             searchRequest.preference("_local");
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-            searchSourceBuilder.query(QueryBuilders.matchQuery("name", "name 1"));
+            searchSourceBuilder.query(QueryBuilders.matchQuery("content", "文档中文"));
             searchSourceBuilder.from(0);
             searchSourceBuilder.size(5);
             //查询结果是否包含文档
             searchSourceBuilder.fetchSource(true);
+            String[] includeFields = new String[]{"filename", "createdate"};
+            String[] excludeFields = new String[]{};
+            searchSourceBuilder.fetchSource(includeFields, excludeFields);
             searchSourceBuilder.timeout(new TimeValue(3, TimeUnit.SECONDS));
             //排序
-            searchSourceBuilder.sort(new FieldSortBuilder("_id").order(SortOrder.DESC));
+            searchSourceBuilder.sort(new FieldSortBuilder("createdate").order(SortOrder.DESC));
 
             searchRequest.source(searchSourceBuilder);
             SearchResponse searchResponse = client.search(searchRequest);
@@ -131,12 +137,16 @@ public class SearchAPI {
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
             HighlightBuilder highlightBuilder = new HighlightBuilder();
-            HighlightBuilder.Field highlightTitle = new HighlightBuilder.Field("name");
-            highlightBuilder.field(highlightTitle);
-
+            HighlightBuilder.Field highlightFileName = new HighlightBuilder.Field("filename");
+            highlightBuilder.field(highlightFileName);
             searchSourceBuilder.highlighter(highlightBuilder);
 
-            SearchRequest searchRequest = new SearchRequest("test");
+            searchSourceBuilder.query(QueryBuilders.matchQuery("filename", "aboutme"));
+            String[] includeFields = new String[]{"filename", "createdate"};
+            String[] excludeFields = new String[]{};
+            searchSourceBuilder.fetchSource(includeFields, excludeFields);
+
+            SearchRequest searchRequest = new SearchRequest("note");
             searchRequest.source(searchSourceBuilder);
             SearchResponse searchResponse = client.search(searchRequest);
             logger.info("HighlightSearch: " + searchResponse);
@@ -144,5 +154,4 @@ public class SearchAPI {
             logger.error(e.getMessage(), e);
         }
     }
-
 }
