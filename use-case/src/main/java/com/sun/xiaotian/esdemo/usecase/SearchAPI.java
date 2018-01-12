@@ -11,11 +11,18 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.*;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.ScoreSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.elasticsearch.search.suggest.SuggestBuilder;
+import org.elasticsearch.search.suggest.SuggestBuilders;
+import org.elasticsearch.search.suggest.completion.CompletionSuggestionBuilder;
+import org.elasticsearch.search.suggest.phrase.PhraseSuggestionBuilder;
+import org.elasticsearch.search.suggest.term.TermSuggestionBuilder;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -36,6 +43,8 @@ public class SearchAPI {
         testMatchQueryBuilder();
         testSearchSourceBuilder();
         testHighlightSearch();
+        testAggregations();
+        testSuggestions();
     }
 
     private static void testSearchAll() {
@@ -56,8 +65,11 @@ public class SearchAPI {
             String[] excludeFields = new String[]{};
             searchSourceBuilder.fetchSource(includeFields, excludeFields);
             searchSourceBuilder.timeout(new TimeValue(3, TimeUnit.SECONDS));
+            //附带查询耗时数据
+            searchSourceBuilder.profile(true);
 
             searchRequest.source(searchSourceBuilder);
+
             SearchResponse searchResponse = client.search(searchRequest);
             logger.info("searchResponse: " + searchResponse);
         } catch (IOException | ElasticsearchException e) {
@@ -136,12 +148,16 @@ public class SearchAPI {
         try (RestHighLevelClient client = new RestHighLevelClient(RestClientBuilderFactory.getBClientBuilder())) {
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
+            //filename 字段高亮
             HighlightBuilder highlightBuilder = new HighlightBuilder();
             HighlightBuilder.Field highlightFileName = new HighlightBuilder.Field("filename");
             highlightBuilder.field(highlightFileName);
             searchSourceBuilder.highlighter(highlightBuilder);
 
+            //查找文件名为 about me 的文件
             searchSourceBuilder.query(QueryBuilders.matchQuery("filename", "aboutme"));
+            //文件名是 keyword 类型的，查询 aboutme2 查不到数据
+            //searchSourceBuilder.query(QueryBuilders.matchQuery("filename", "aboutme2"));
             String[] includeFields = new String[]{"filename", "createdate"};
             String[] excludeFields = new String[]{};
             searchSourceBuilder.fetchSource(includeFields, excludeFields);
@@ -154,4 +170,60 @@ public class SearchAPI {
             logger.error(e.getMessage(), e);
         }
     }
+
+    private static void testAggregations() {
+        try (RestHighLevelClient client = new RestHighLevelClient(RestClientBuilderFactory.getBClientBuilder())) {
+
+            //查询
+            MatchQueryBuilder matchQueryBuilder = QueryBuilders.matchQuery("content", "Linux");
+            //聚合，根据父id进行分类
+            TermsAggregationBuilder childCount = AggregationBuilders.terms("childCount").field("parentid");
+            //子聚合,最小文件的大小
+            TermsAggregationBuilder fileSize = childCount.subAggregation(AggregationBuilders.min("filesize").field("filesize"));
+
+            SearchSourceBuilder searBuilder = new SearchSourceBuilder();
+            searBuilder.query(matchQueryBuilder);
+            searBuilder.aggregation(childCount);
+            searBuilder.fetchSource(false);
+
+            SearchRequest searchRequest = new SearchRequest("note");
+            searchRequest.source(searBuilder);
+            SearchResponse searchResponse = client.search(searchRequest);
+            logger.info("testAggregations：" + searchResponse);
+        } catch (IOException | ElasticsearchException e) {
+            logger.error(e.getMessage(), e);
+        }
+    }
+
+    private static void testSuggestions() {
+        try (RestHighLevelClient client = new RestHighLevelClient(RestClientBuilderFactory.getBClientBuilder())) {
+
+            //查询
+            TermQueryBuilder termQueryBuilder = QueryBuilders.termQuery("content", "匹配任意字符串");
+
+            //输出，查询的时候，文本被解析成什么内容
+            TermSuggestionBuilder suggestionBuilder = SuggestBuilders.termSuggestion("content").text("匹配任意字符串");
+
+            SuggestBuilder suggestBuilder = new SuggestBuilder();
+            suggestBuilder.addSuggestion("suggestfile", suggestionBuilder);
+
+
+            SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+            sourceBuilder.suggest(suggestBuilder);
+            sourceBuilder.query(termQueryBuilder);
+
+            String[] includeFields = new String[]{"filename", "createdate"};
+            String[] excludeFields = new String[]{};
+            sourceBuilder.fetchSource(includeFields, excludeFields);
+
+            SearchRequest searchRequest = new SearchRequest("note");
+            searchRequest.source(sourceBuilder);
+
+            SearchResponse searchResponse = client.search(searchRequest);
+            logger.info("testAggregations：" + searchResponse);
+        } catch (IOException | ElasticsearchException e) {
+            logger.error(e.getMessage(), e);
+        }
+    }
+
 }
